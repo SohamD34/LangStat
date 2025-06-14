@@ -39,6 +39,7 @@ class LanguageStatsProvider implements vscode.TreeDataProvider<StatsItem> {
 
     getChildren(element?: StatsItem): Thenable<StatsItem[]> {
         if (!element) {
+            // Root level - show language statistics
             const items: StatsItem[] = [];
             
             if (Object.keys(this.stats).length === 0) {
@@ -47,25 +48,21 @@ class LanguageStatsProvider implements vscode.TreeDataProvider<StatsItem> {
                 return Promise.resolve([noStatsItem]);
             }
 
-            // Add the color bar at the top
-            const colorBarItem = this.createColorBarItem();
-            items.push(colorBarItem);
-
             const sortedLanguages = Object.entries(this.stats)
                 .sort(([,a], [,b]) => b.percentage - a.percentage);
 
             for (const [language, data] of sortedLanguages) {
-                const label = `**${language}**`; // Bold language name
+                const label = `${language}`;
                 const description = `${data.percentage.toFixed(1)}% • ${data.files} files • ${data.lines.toLocaleString()} lines`;
                 const item = new StatsItem(label, description, vscode.TreeItemCollapsibleState.Collapsed, language);
                 
-                // Set language-specific icon with background color
+                // Set language-specific icon and color
                 const iconInfo = this.getLanguageIcon(language);
-                item.iconPath = new vscode.ThemeIcon(iconInfo.icon, new vscode.ThemeColor('editor.foreground'));
-                
-                // Add custom resource URI for background color styling
-                item.resourceUri = vscode.Uri.parse(`language:${language}`);
-                item.contextValue = `language-${language.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+                if (iconInfo.iconPath) {
+                    item.iconPath = iconInfo.iconPath;
+                } else {
+                    item.iconPath = new vscode.ThemeIcon(iconInfo.icon, new vscode.ThemeColor(iconInfo.color));
+                }
                 
                 items.push(item);
             }
@@ -75,10 +72,10 @@ class LanguageStatsProvider implements vscode.TreeDataProvider<StatsItem> {
             // Show details for a specific language
             const data = this.stats[element.language];
             const items: StatsItem[] = [
-                new StatsItem(`📁 Files: ${data.files}`, '', vscode.TreeItemCollapsibleState.None),
-                new StatsItem(`📏 Lines: ${data.lines.toLocaleString()}`, '', vscode.TreeItemCollapsibleState.None),
-                new StatsItem(`💾 Size: ${this.formatBytes(data.bytes)}`, '', vscode.TreeItemCollapsibleState.None),
-                new StatsItem(`📊 Percentage: ${data.percentage.toFixed(2)}%`, '', vscode.TreeItemCollapsibleState.None)
+                new StatsItem(`Files: ${data.files}`, '', vscode.TreeItemCollapsibleState.None),
+                new StatsItem(`Lines: ${data.lines.toLocaleString()}`, '', vscode.TreeItemCollapsibleState.None),
+                new StatsItem(`Size: ${this.formatBytes(data.bytes)}`, '', vscode.TreeItemCollapsibleState.None),
+                new StatsItem(`Percentage: ${data.percentage.toFixed(2)}%`, '', vscode.TreeItemCollapsibleState.None)
             ];
             
             // Add colored icons for detail items
@@ -93,91 +90,55 @@ class LanguageStatsProvider implements vscode.TreeDataProvider<StatsItem> {
         return Promise.resolve([]);
     }
 
-    private createColorBarItem(): StatsItem {
-        // Create a visual representation of the language distribution
-        const sortedLanguages = Object.entries(this.stats)
-            .sort(([,a], [,b]) => b.percentage - a.percentage);
-        
-        let colorBar = '';
-        let description = 'Language Distribution: ';
-        
-        // Create a text-based color bar representation
-        for (const [language, data] of sortedLanguages) {
-            const percentage = data.percentage;
-            const iconInfo = this.getLanguageIcon(language);
-            
-            // Add color blocks proportional to percentage
-            const blocks = Math.max(1, Math.round(percentage / 2)); // Each block represents ~2%
-            colorBar += '█'.repeat(blocks);
-            
-            if (description.length < 100) { // Keep description manageable
-                description += `${language} ${percentage.toFixed(1)}%, `;
-            }
-        }
-        
-        description = description.slice(0, -2); // Remove trailing comma
-        
-        const item = new StatsItem(
-            `📊 ${colorBar}`,
-            description,
-            vscode.TreeItemCollapsibleState.None
-        );
-        
-        item.iconPath = new vscode.ThemeIcon('graph-line', new vscode.ThemeColor('charts.foreground'));
-        item.contextValue = 'color-bar';
-        
-        return item;
-    }
-
-    private getLanguageIcon(language: string): { icon: string, color: string, bgColor: string, iconPath?: vscode.Uri } {
-        const iconMap: { [key: string]: { icon: string, color: string, bgColor: string, iconPath?: vscode.Uri } } = {
-            'JavaScript': { icon: 'symbol-function', color: '#000000', bgColor: '#f1e05a' },
-            'TypeScript': { icon: 'symbol-class', color: '#ffffff', bgColor: '#2b7489' },
-            'Python': { icon: 'symbol-snake', color: '#ffffff', bgColor: '#3572A5' },
-            'Java': { icon: 'symbol-class', color: '#ffffff', bgColor: '#b07219' },
-            'C++': { icon: 'symbol-structure', color: '#ffffff', bgColor: '#f34b7d' },
-            'C': { icon: 'symbol-structure', color: '#ffffff', bgColor: '#555555' },
-            'C#': { icon: 'symbol-class', color: '#ffffff', bgColor: '#239120' },
-            'Go': { icon: 'symbol-function', color: '#ffffff', bgColor: '#00ADD8' },
-            'Rust': { icon: 'gear', color: '#ffffff', bgColor: '#dea584' },
-            'PHP': { icon: 'symbol-function', color: '#ffffff', bgColor: '#4F5D95' },
-            'Ruby': { icon: 'ruby', color: '#ffffff', bgColor: '#701516' },
-            'Swift': { icon: 'symbol-class', color: '#ffffff', bgColor: '#ffac45' },
-            'Kotlin': { icon: 'symbol-class', color: '#ffffff', bgColor: '#F18E33' },
-            'Scala': { icon: 'symbol-class', color: '#ffffff', bgColor: '#c22d40' },
-            'HTML': { icon: 'symbol-tag', color: '#ffffff', bgColor: '#e34c26' },
-            'CSS': { icon: 'symbol-color', color: '#ffffff', bgColor: '#563d7c' },
-            'SCSS': { icon: 'symbol-color', color: '#ffffff', bgColor: '#c6538c' },
-            'Sass': { icon: 'symbol-color', color: '#ffffff', bgColor: '#a53b70' },
-            'Less': { icon: 'symbol-color', color: '#ffffff', bgColor: '#1d365d' },
-            'Vue': { icon: 'symbol-structure', color: '#ffffff', bgColor: '#2c3e50' },
-            'Svelte': { icon: 'symbol-structure', color: '#ffffff', bgColor: '#ff3e00' },
-            'React': { icon: 'symbol-structure', color: '#000000', bgColor: '#61dafb' },
-            'JSON': { icon: 'symbol-object', color: '#000000', bgColor: '#cbcb00' },
-            'YAML': { icon: 'symbol-array', color: '#ffffff', bgColor: '#cb171e' },
-            'XML': { icon: 'symbol-tag', color: '#ffffff', bgColor: '#0060ac' },
-            'SQL': { icon: 'database', color: '#ffffff', bgColor: '#336791' },
-            'Shell': { icon: 'terminal', color: '#ffffff', bgColor: '#89e051' },
-            'Bash': { icon: 'terminal', color: '#ffffff', bgColor: '#89e051' },
-            'PowerShell': { icon: 'terminal', color: '#ffffff', bgColor: '#012456' },
-            'R': { icon: 'graph', color: '#ffffff', bgColor: '#198CE7' },
-            'MATLAB': { icon: 'graph', color: '#ffffff', bgColor: '#e16737' },
-            'Perl': { icon: 'symbol-function', color: '#ffffff', bgColor: '#0298c3' },
-            'Lua': { icon: 'symbol-function', color: '#ffffff', bgColor: '#000080' },
-            'Dart': { icon: 'symbol-class', color: '#ffffff', bgColor: '#00B4AB' },
-            'Elm': { icon: 'symbol-function', color: '#ffffff', bgColor: '#60B5CC' },
-            'Haskell': { icon: 'symbol-function', color: '#ffffff', bgColor: '#5e5086' },
-            'Clojure': { icon: 'symbol-function', color: '#ffffff', bgColor: '#db5855' },
-            'F#': { icon: 'symbol-function', color: '#ffffff', bgColor: '#b845fc' },
-            'Erlang': { icon: 'symbol-function', color: '#ffffff', bgColor: '#B83998' },
-            'Elixir': { icon: 'symbol-function', color: '#ffffff', bgColor: '#6e4a7e' },
-            'Crystal': { icon: 'symbol-structure', color: '#ffffff', bgColor: '#000100' },
-            'Nim': { icon: 'symbol-function', color: '#000000', bgColor: '#ffc200' },
-            'Julia': { icon: 'symbol-function', color: '#ffffff', bgColor: '#a270ba' },
-            'Zig': { icon: 'symbol-structure', color: '#ffffff', bgColor: '#ec915c' }
+    private getLanguageIcon(language: string): { icon: string, color: string, iconPath?: vscode.Uri } {
+        const iconMap: { [key: string]: { icon: string, color: string, iconPath?: vscode.Uri } } = {
+            'JavaScript': { icon: 'symbol-function', color: 'charts.yellow' },
+            'TypeScript': { icon: 'symbol-class', color: 'charts.blue' },
+            'Python': { icon: 'symbol-snake', color: 'charts.green' },
+            'Java': { icon: 'symbol-class', color: 'charts.red' },
+            'C++': { icon: 'symbol-structure', color: 'charts.blue' },
+            'C': { icon: 'symbol-structure', color: 'charts.blue' },
+            'C#': { icon: 'symbol-class', color: 'charts.purple' },
+            'Go': { icon: 'symbol-function', color: 'charts.cyan' },
+            'Rust': { icon: 'gear', color: 'charts.orange' },
+            'PHP': { icon: 'symbol-function', color: 'charts.purple' },
+            'Ruby': { icon: 'ruby', color: 'charts.red' },
+            'Swift': { icon: 'symbol-class', color: 'charts.orange' },
+            'Kotlin': { icon: 'symbol-class', color: 'charts.purple' },
+            'Scala': { icon: 'symbol-class', color: 'charts.red' },
+            'HTML': { icon: 'symbol-tag', color: 'charts.orange' },
+            'CSS': { icon: 'symbol-color', color: 'charts.blue' },
+            'SCSS': { icon: 'symbol-color', color: 'charts.pink' },
+            'Sass': { icon: 'symbol-color', color: 'charts.pink' },
+            'Less': { icon: 'symbol-color', color: 'charts.blue' },
+            'Vue': { icon: 'symbol-structure', color: 'charts.green' },
+            'Svelte': { icon: 'symbol-structure', color: 'charts.orange' },
+            'React': { icon: 'symbol-structure', color: 'charts.cyan' },
+            'JSON': { icon: 'symbol-object', color: 'charts.yellow' },
+            'YAML': { icon: 'symbol-array', color: 'charts.red' },
+            'XML': { icon: 'symbol-tag', color: 'charts.green' },
+            'SQL': { icon: 'database', color: 'charts.blue' },
+            'Shell': { icon: 'terminal', color: 'charts.green' },
+            'Bash': { icon: 'terminal', color: 'charts.green' },
+            'PowerShell': { icon: 'terminal', color: 'charts.blue' },
+            'R': { icon: 'graph', color: 'charts.blue' },
+            'MATLAB': { icon: 'graph', color: 'charts.orange' },
+            'Perl': { icon: 'symbol-function', color: 'charts.blue' },
+            'Lua': { icon: 'symbol-function', color: 'charts.blue' },
+            'Dart': { icon: 'symbol-class', color: 'charts.cyan' },
+            'Elm': { icon: 'symbol-function', color: 'charts.blue' },
+            'Haskell': { icon: 'symbol-function', color: 'charts.purple' },
+            'Clojure': { icon: 'symbol-function', color: 'charts.green' },
+            'F#': { icon: 'symbol-function', color: 'charts.blue' },
+            'Erlang': { icon: 'symbol-function', color: 'charts.red' },
+            'Elixir': { icon: 'symbol-function', color: 'charts.purple' },
+            'Crystal': { icon: 'symbol-structure', color: 'charts.cyan' },
+            'Nim': { icon: 'symbol-function', color: 'charts.yellow' },
+            'Julia': { icon: 'symbol-function', color: 'charts.purple' },
+            'Zig': { icon: 'symbol-structure', color: 'charts.orange' }
         };
 
-        return iconMap[language] || { icon: 'symbol-file', color: '#ffffff', bgColor: '#586069' };
+        return iconMap[language] || { icon: 'symbol-file', color: 'charts.foreground' };
     }
 
     private analyzeWorkspace(): void {
