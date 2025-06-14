@@ -1,0 +1,153 @@
+/* Language Statistics Extension Styles */
+
+/* JavaScript */
+.language-javascript .monaco-tl-row {
+    background-color: #f1e05a !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+}
+
+/* TypeScript */
+.language-typescript .monaco-tl-row {
+    background-color: #2b7489 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Python */
+.language-python .monaco-tl-row {
+    background-color: #3572A5 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Java */
+.language-java .monaco-tl-row {
+    background-color: #b07219 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* C++ */
+.language-c-- .monaco-tl-row {
+    background-color: #f34b7d !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* C */
+.language-c .monaco-tl-row {
+    background-color: #555555 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* C# */
+.language-c- .monaco-tl-row {
+    background-color: #239120 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Go */
+.language-go .monaco-tl-row {
+    background-color: #00ADD8 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Rust */
+.language-rust .monaco-tl-row {
+    background-color: #dea584 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* PHP */
+.language-php .monaco-tl-row {
+    background-color: #4F5D95 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Ruby */
+.language-ruby .monaco-tl-row {
+    background-color: #701516 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Swift */
+.language-swift .monaco-tl-row {
+    background-color: #ffac45 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* HTML */
+.language-html .monaco-tl-row {
+    background-color: #e34c26 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* CSS */
+.language-css .monaco-tl-row {
+    background-color: #563d7c !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* SCSS */
+.language-scss .monaco-tl-row {
+    background-color: #c6538c !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Vue */
+.language-vue .monaco-tl-row {
+    background-color: #2c3e50 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* React */
+.language-react .monaco-tl-row {
+    background-color: #61dafb !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+}
+
+/* JSON */
+.language-json .monaco-tl-row {
+    background-color: #cbcb00 !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+}
+
+/* Color bar styling */
+.color-bar .monaco-tl-row {
+    background: linear-gradient(90deg, 
+        #f1e05a 0%, #f1e05a 45%,
+        #2b7489 45%, #2b7489 70%,
+        #3572A5 70%, #3572A5 85%,
+        #e34c26 85%, #e34c26 95%,
+        #563d7c 95%, #563d7c 100%
+    ) !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    border-radius: 4px !important;
+    margin: 2px 0 !important;
+}
+
+/* General improvements */
+.monaco-list .monaco-list-row.language-stats-item {
+    border-radius: 4px !important;
+    margin: 1px 0 !important;
+    padding: 2px 4px !important;
+}
+
+.monaco-list .monaco-list-row.language-stats-item:hover {
+    opacity: 0.9 !important;
+}
