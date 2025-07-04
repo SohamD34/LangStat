@@ -1,4 +1,4 @@
-Attempt to create a VS Code Extension that mimics GitHub's language statistics for the current directory.
+Attempt to create a VS Code Extension that mimics GitHub's language statistics for the current open directory.
 
 ## Features
 - Displays the language statistics of the current directory in a tree view.
